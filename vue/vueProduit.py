@@ -4,6 +4,9 @@ from tkinter import messagebox
 from model import *
 
 class VueProduit(Toplevel):
+    """
+    Dialogue pour modifier tous les produis de l'association
+    """
     def __init__(self, parent, page: Page):
         super().__init__(parent)
 

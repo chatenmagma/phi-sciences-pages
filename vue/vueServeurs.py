@@ -4,6 +4,9 @@ from tkinter import messagebox
 from model import *
 
 class VueServeur(Toplevel):
+    """
+    Dialogue pour modifier les serveurs et le président
+    """
     def __init__(self, parent, page: Page):
         super().__init__(parent)
 

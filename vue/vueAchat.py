@@ -7,6 +7,9 @@ from datetime import datetime
 from model import *
 
 class VueAchat(Toplevel):
+    """
+    Dialogue pour faire payer des choses aux adhérents
+    """
     def __init__(self, parent, page: Page, index: int):
         super().__init__(parent)
 

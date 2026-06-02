@@ -4,6 +4,9 @@ from tkinter import StringVar, DoubleVar
 from model.produit import Achat
 
 class Adherent:
+    """
+    Contenant tous les données des adhérents dont l'historique des achats. L'achat le plus récent se situe en haut de la pile
+    """
     def __init__(self, nom: str = "", prenom: str = "", solde: float = 0):
         self.nomProperty: StringVar = StringVar(value=nom)
         self.prenomProperty: StringVar = StringVar(value=prenom)

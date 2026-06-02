@@ -4,6 +4,9 @@ from model.adherent import Adherent, AdherentDTO
 from model.produit import Produit
 
 class Page:
+    """
+    Est le mdoèle de tout le projet. Il sert à gérer les 200 pages contenant des adhérents
+    """
     MAX_ADHERENTS: int = 200
     AJOUT_COMMAND: str = "ajout"
     RETRAIT_COMMAND: str = "retrait"
@@ -54,6 +57,9 @@ class Page:
 
 @dataclass
 class PageDTO:
+    """
+    Type de données pour le modèle servant à la sauvegarde du fichier
+    """
     serveurs: list[str]
     president: str
     adherents: dict[int, AdherentDTO]
@@ -61,6 +67,9 @@ class PageDTO:
 
     @classmethod
     def from_page(cls, data: Page) -> PageDTO:
+        """
+        Donnee le type donnée 
+        """
         return PageDTO(
             [serveur for serveur in data.serveurs],
             data.president,
@@ -78,9 +87,12 @@ class PageDTO:
         )
     
     def update(self, page: Page) -> None:
-        for k, v in self.adherents.items():
+        """
+        Met à jour le modèle avec le type de donnée
+        """
+        for k, v in self.adherents.items(): # Parcours la liste des adhérents
             v.update(page[k])
-        for p in self.produits:
+        for p in self.produits: # Parcours la liste des produits
             page.produits[p.nom] = p
 
         page.serveurs = self.serveurs

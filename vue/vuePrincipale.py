@@ -13,6 +13,9 @@ from vue.vueProduit import VueProduit
 from vue.vueServeurs import VueServeur
 
 class VuePrincipale(Tk):
+    """
+    Vue principale avec les 200 pages
+    """
     def __init__(self):
         super().__init__(None, None, "Tk", True, False, None)
 

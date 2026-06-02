@@ -3,6 +3,9 @@ from datetime import datetime
 
 @dataclass
 class Achat:
+    """
+    Servant à stocker les données utiles de l'achat
+    """
     nom: str
     prix: float
     quand: datetime
@@ -26,6 +29,9 @@ class Achat:
 
 @dataclass
 class Produit:
+    """
+    Les données nécessaire pour les produits
+    """
     nom: str
     prix: float
 
