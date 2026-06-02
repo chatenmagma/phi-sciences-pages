@@ -67,7 +67,7 @@ class Adherent:
         """
         Donne l'historique de tous les achats de la page. Le premier élément est l'achat le plus récent
         """
-        return [self.getHistorique()[i] for i in self.getIndicesAchats()]
+        return [self.page.getHistorique()[i] for i in self.getIndicesAchats()]
     
     def setAchats(self, nouveauxAchats: list[int]) -> None:
         self.achats = nouveauxAchats.copy()

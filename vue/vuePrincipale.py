@@ -2,15 +2,17 @@ from tkinter import *
 from tkinter import filedialog
 from tkinter import messagebox
 
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+
+from vue.vueAchat import VueAchat
+from vue.vueAide import VueAide
+from vue.vueHistorique import VueHistorique
+from vue.vueProduit import VueProduit
+from vue.vueServeurs import VueServeur
 
 from model import *
 from service import *
-
-from vue.vueAchat import VueAchat
-from vue.vueProduit import VueProduit
-from vue.vueServeurs import VueServeur
 
 class VuePrincipale(Tk):
     """
@@ -60,11 +62,15 @@ class VuePrincipale(Tk):
 
         return f"pagePhiSciences_{anneUniv - 1}-{anneUniv}.json"
     
+    def aide_commande(self) -> None:
+        VueAide(self)
+    
     def sauvegarderCommand(self) -> None:
         with open(self.fichierPrincipal(), "w", encoding="utf-8") as f: 
             f.write(serialise(self.page))
             f.close()
         print("sauvegarde du fichier principal est fait")
+
     def sauvegarderACommand(self) -> None:
         self.sauvegarderCommand()
 
@@ -82,6 +88,10 @@ class VuePrincipale(Tk):
         VueAchat(self, self.page, index)
 
         self.sauvegarderCommand()
+    
+    def vue_historique_command(self, index: int) -> None:
+        if not self.page[index].estVide():
+            VueHistorique(self, self.page, index)
     
     def modifProduitCommand(self) -> None:
         VueProduit(self, self.page)
@@ -124,6 +134,8 @@ class VuePrincipale(Tk):
         editionMenu.add_command(label="Edition du staff", command=self.modifServeursCommand)
 
         menuBar.add_cascade(label="Edition", menu=editionMenu)
+
+        menuBar.add_command(label="Aide", command=self.aide_commande)
 
         return menuBar
     
@@ -183,6 +195,7 @@ class VuePrincipale(Tk):
         widget = (indexLabel, entree, indexLabel, nomLabel, prenomLabel, solde)
         for w in widget:
             w.bind("<Button-1>", lambda event: self.payerCommand(index))
+            w.bind("<Button-3>", lambda event: self.vue_historique_command(index))
 
             # Gestion de la sourris hoverlay sur les pages
             w.bind("<Enter>", lambda event: (

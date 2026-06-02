@@ -26,7 +26,7 @@ class Achat:
         return self.quand.strftime("%d/%m/%Y %H:%M")
     
     def __str__(self) -> str:
-        return f"{self.prix}€ {self.nom} par {self.qui} le {self.quand.strftime("%d/%m/%Y à %H:%M:%S")} a la page {self.page}"
+        return f"{self.prix:.2f}€ {self.nom} par {self.qui} le {self.quand.strftime("%d/%m/%Y à %H:%M:%S")} a la page {self.page}"
     
 
 @dataclass
