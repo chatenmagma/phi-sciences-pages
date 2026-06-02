@@ -140,13 +140,10 @@ class VueAchat(Toplevel):
         return bouttonEnBasFrame
     
     def valider(self):
-        if(self.nouveauNom.get() != ""): self.adherent.nomProperty.set(self.nouveauNom.get().upper())
-        if(self.nouveauPrenom.get() != ""): self.adherent.prenomProperty.set(self.nouveauPrenom.get().capitalize())
-
-        if self.adherent.nomProperty.get() == "":
+        if self.nouveauNom.get() == "":
             messagebox.showerror(title="C'est qui cet adhérent", message="L'adhérent n'a pas de nom de famille")
             return
-        if self.adherent.prenomProperty.get() == "":
+        if self.nouveauPrenom.get() == "":
             messagebox.showerror(title="C'est qui cet adhérent", message="L'adhérent n'a pas de prenom")
             return
 
@@ -163,12 +160,13 @@ class VueAchat(Toplevel):
         if self.choixServeur.get() not in self.page.serveurs:
             messagebox.showerror(title="EST-CE ANONYMOUS KI NOUS PIRATE !!!!", message="Je ne connais pas ce serveur, je veux lui payer sa girafe à lui ;)")
             return
-        if (self.choixProduit.get() == "ajout" or self.choixProduit.get() == "retrait") and self.ptetreValeur.get() == "":
+        if (self.choixProduit.get() == Page.AJOUT_COMMAND or self.choixProduit.get() == Page.RETRAIT_COMMAND) and self.ptetreValeur.get() == "":
             messagebox.showerror(title="OU EST LA VALEUR !!!!", message="Pour tout ajout ou retrait, veuillez explecitement mettre la valeur...")
             return
         
         valeur: float = 0.0
 
+        # Recupe la valeur c-à-d son prix
         if (self.choixProduit.get() == Page.AJOUT_COMMAND) or (self.choixProduit.get() == Page.RETRAIT_COMMAND):
             try:
                 if self.choixProduit.get() == Page.AJOUT_COMMAND or self.choixProduit.get() == Page.RETRAIT_COMMAND:
@@ -180,9 +178,17 @@ class VueAchat(Toplevel):
             except:
                 messagebox.showerror(title="ERREUR DE TYPAGE DE VALEUR", message="La valeur est un chiffre, et ça doit être de la forme << 0.5 >> avec un POINT")
                 return
-        else:
+        else: # On recupère la valeur du produit
             valeur = self.page.produits[self.choixProduit.get()].prix
         
+        # Demande de confirmation de payer un adhérent n'ayant pas assez pour payer le choix
+        if self.choixProduit.get() != Page.AJOUT_COMMAND and self.adherent.getSolde() - valeur < 0 and messagebox.askquestion(title="FAIT GAF", message="Voulez-vous vraiment faire payer un adhérence qui n'a pas assez dans sa solde ?") == "no":
+            return
+        
+        # On met le nouveau nom et prénom à l'adhérent
+
+        self.adherent.nomProperty.set(self.nouveauNom.get().upper())
+        self.adherent.prenomProperty.set(self.nouveauPrenom.get().capitalize())
       
         self.adherent.payer(Achat(self.choixProduit.get(), valeur, datetime.now(), self.choixServeur.get()))
 
