@@ -15,11 +15,12 @@ class VueAchat(Toplevel):
 
         self.title(f"Vous achetez quoi ? PAGE n°{index + 1}")
 
+        self.index: int = index
+
         self.page: Page = page
-        self.adherent: Adherent = page[index]
         
-        self.nouveauNom: StringVar = StringVar(value=self.adherent.getNom())
-        self.nouveauPrenom: StringVar = StringVar(value=self.adherent.getPrenom())
+        self.nouveauNom: StringVar = StringVar(value=page[index].getNom())
+        self.nouveauPrenom: StringVar = StringVar(value=page[index].getPrenom())
 
         self.choixProduit: StringVar = StringVar()
         self.choixServeur: StringVar = StringVar()
@@ -151,20 +152,20 @@ class VueAchat(Toplevel):
             return
 
         if self.choixProduit.get() == "":
-            messagebox.showerror(title="Erreur C KWA TACHETE", message="T'as oublié de mettre un produit dans QUOI?...")
+            messagebox.showerror(title="Devez dire quoi acheté", message="Vous avez oublié de mettre un produit dans QUOI?")
             return
         if self.choixServeur.get() == "":
-            messagebox.showerror(title="Erreur C KI FAI LAKSION", message="C'est quiqui fait l'action, tu dois mettre un serveur dans QUI?...")
+            messagebox.showerror(title="C'est qui fait l'action d'achat (un membre du staff)", message="Vous avez oublié de mettre un membre dans QUI?")
             return
         
         if self.choixProduit.get() not in list(self.page.produits.keys()):
-            messagebox.showerror(title="C KWAH CE TRUC?", message="Ce produit n'existe pas...")
+            messagebox.showerror(title="Produit inconnu", message="Ce produit est inconnu dans la liste, vous pouvez l'ajouté sur edition > modif produit")
             return
         if self.choixServeur.get() not in self.page.serveurs:
-            messagebox.showerror(title="EST-CE ANONYMOUS KI NOUS PIRATE !!!!", message="Je ne connais pas ce serveur, je veux lui payer sa girafe à lui ;)")
+            messagebox.showerror(title="Membre du staff inconnu", message="Ce membre est inconnu dans la liste, vous pouvez l'ajouté sur edition > modif staff")
             return
         if (self.choixProduit.get() == Page.AJOUT_COMMAND or self.choixProduit.get() == Page.RETRAIT_COMMAND) and self.ptetreValeur.get() == "":
-            messagebox.showerror(title="OU EST LA VALEUR !!!!", message="Pour tout ajout ou retrait, veuillez explecitement mettre la valeur...")
+            messagebox.showerror(title="Manque la donnée valeur", message="Pour tout ajout ou retrait, vous devez mettre la valeur")
             return
         
         valeur: float = 0.0
@@ -173,26 +174,26 @@ class VueAchat(Toplevel):
         if (self.choixProduit.get() == Page.AJOUT_COMMAND) or (self.choixProduit.get() == Page.RETRAIT_COMMAND):
             try:
                 if self.choixProduit.get() == Page.AJOUT_COMMAND or self.choixProduit.get() == Page.RETRAIT_COMMAND:
-                    valeur = float(self.ptetreValeur.get())
+                    valeur = float(self.ptetreValeur.get().replace(",", ".")) # On remplace la virgule par un point, c'est plus pratique ;)
 
                     if valeur < 0:
-                        messagebox.showerror(title="Erreur T CON", message="La valeur doit être toujours positif....")
+                        messagebox.showerror(title="Erreur valeur negative", message="La valeur doit être toujours positif")
                         return
             except:
-                messagebox.showerror(title="ERREUR DE TYPAGE DE VALEUR", message="La valeur est un chiffre, et ça doit être de la forme << 0.5 >> avec un POINT")
+                messagebox.showerror(title="Erreur du chiffre de valeur", message="Vous devez écrire un chiffre sous la forme 23,55 ou 0,34. De plus ce chiffre doit être positif")
                 return
         else: # On recupère la valeur du produit
             valeur = self.page.produits[self.choixProduit.get()].prix
         
         # Demande de confirmation de payer un adhérent n'ayant pas assez pour payer le choix
-        if self.choixProduit.get() != Page.AJOUT_COMMAND and self.adherent.getSolde() - valeur < 0 and messagebox.askquestion(title="FAIT GAF", message="Voulez-vous vraiment faire payer un adhérence qui n'a pas assez dans sa solde ?") == "no":
+        if self.choixProduit.get() != Page.AJOUT_COMMAND and self.page[self.index].getSolde() - valeur < 0 and messagebox.askquestion(title="Adhérent n'ayant la solde suffisante /!\\", message="Voulez-vous vraiment faire payer un adhérence qui n'a pas assez dans sa solde ?") == "no":
             return
         
         # On met le nouveau nom et prénom à l'adhérent
 
-        self.adherent.nomProperty.set(self.nouveauNom.get().upper())
-        self.adherent.prenomProperty.set(self.nouveauPrenom.get().capitalize())
+        self.page[self.index].nomProperty.set(self.nouveauNom.get().upper())
+        self.page[self.index].prenomProperty.set(self.nouveauPrenom.get().capitalize())
       
-        self.adherent.payer(Achat(self.choixProduit.get(), valeur, datetime.now(), self.choixServeur.get()))
+        self.page.payer(self.index, Achat(self.choixProduit.get(), valeur, datetime.now(), self.choixServeur.get(), self.index))
 
         self.destroy()

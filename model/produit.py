@@ -10,6 +10,7 @@ class Achat:
     prix: float
     quand: datetime
     qui: str
+    page: int
 
     @staticmethod
     def from_dict(data: dict) -> Achat:
@@ -17,14 +18,15 @@ class Achat:
             data["nom"],
             data["prix"],
             datetime.fromisoformat(data["quand"]),
-            data["qui"]
+            data["qui"],
+            data["page"]
         )
 
     def getQuandFormat(self) -> str:
         return self.quand.strftime("%d/%m/%Y %H:%M")
     
     def __str__(self) -> str:
-        return f"{self.prix}€ {self.nom} par {self.qui} le {self.quand.strftime("%d/%m/%Y à %H:%M:%S")}"
+        return f"{self.prix}€ {self.nom} par {self.qui} le {self.quand.strftime("%d/%m/%Y à %H:%M:%S")} a la page {self.page}"
     
 
 @dataclass

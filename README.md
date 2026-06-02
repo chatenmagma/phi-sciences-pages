@@ -39,3 +39,4 @@ Merci d'avoir lu, et tous ceux qui ajoute ou corrige un bug, veuillé augmenté 
   * Gestion d'ouverture automatique du fichier JSON de l'année en cours
   * Création automatique du fichier JSON de l'année en cours. Change en août
   * Beaucoup de protections sur les achats (vérification sur la solde avant de payer !!!!)
+  * Historique des achats

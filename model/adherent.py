@@ -7,20 +7,23 @@ class Adherent:
     """
     Contenant tous les données des adhérents dont l'historique des achats. L'achat le plus récent se situe en haut de la pile
     """
-    def __init__(self, nom: str = "", prenom: str = "", solde: float = 0):
+    def __init__(self, page, nom: str = "", prenom: str = "", solde: float = 0):
+        self.page = page
         self.nomProperty: StringVar = StringVar(value=nom)
         self.prenomProperty: StringVar = StringVar(value=prenom)
-        self.soldeProperty: DoubleVar = DoubleVar(value=solde)
-        self.soldeAffichageProperty: StringVar = StringVar(value=f"{solde}€")
+        self.soldeProperty: DoubleVar = DoubleVar()
+        self.soldeAffichageProperty: StringVar = StringVar()
 
-        self.achats: list[Achat] = []
+        self.setSolde(solde)
+
+        self.achats: list[int] = []
 
     def renomer(self, nom: str, prenom: str) -> None:
         self.nomProperty.set(nom)
         self.prenomProperty.set(prenom)
     
-    def payer(self, achat: Achat) -> None:
-        self.achats.insert(0, achat)
+    def payer(self, achat: Achat, indiceHistorique: int) -> None:
+        self.achats.insert(0, indiceHistorique)
 
         if achat.nom == "ajout":
             self.setSolde(self.getSolde() + achat.prix)
@@ -30,15 +33,24 @@ class Adherent:
         if(self.estVide()): return
 
         self.renomer("", "")
-        self.setSolde(0)
+        self.setSolde(0.0)
         self.achats = []
 
     def estNegatif(self) -> bool:
-        return self.getSolde() < 0
+        """
+        Dit si l'adhérent a un solde négatif
+        """
+        return self.getSolde() < 0.0
     def estVide(self) -> bool:
-        return len(self.getNom()) == 0 and len(self.getPrenom()) == 0
+        """
+        Dit si l'adhérent n'est pas initialisé, c'est-à-dire que pour le modèle cette page à cette indice a personne
+        """
+        return self.getNom() == "" and self.getPrenom() == ""
     def estZero(self) -> bool:
-        return self.getSolde() == 0
+        """
+        Dit si l'adhérent a un solde nul (c'est-à-dire 0)
+        """
+        return (self.getSolde() * 100 / 100) == 0.00
 
     def getNom(self) -> str:
         return self.nomProperty.get()
@@ -46,19 +58,34 @@ class Adherent:
         return self.prenomProperty.get()
     def getSolde(self) -> float:
         return self.soldeProperty.get()
-    def getAchats(self) -> list[Achat]:
+    def getIndicesAchats(self) -> list[int]:
+        """
+        Donne l'indice de l'historique venant du modèle des achats de la page. Le premier élément est l'achat le plus récent
+        """
         return self.achats
-
+    def getAchats(self) -> list[Achat]:
+        """
+        Donne l'historique de tous les achats de la page. Le premier élément est l'achat le plus récent
+        """
+        return [self.getHistorique()[i] for i in self.getIndicesAchats()]
+    
+    def setAchats(self, nouveauxAchats: list[int]) -> None:
+        self.achats = nouveauxAchats.copy()
     def setSolde(self, solde: float) -> None:
         self.soldeProperty.set(solde)
-        self.soldeAffichageProperty.set(f"{solde}€")
+        self.soldeAffichageProperty.set(f"{solde:.2f}€".replace(".", ","))
+    
+    def getDernierAchat(self) -> Achat:
+        return self.page.getHistorique()[self.achats[0]]
+    def getAchat(self, index: int) -> Achat:
+        return self.page.getHistorique()[index]
     
 @dataclass
 class AdherentDTO:
     nom: str
     prenom: str
     solde: float
-    achats: list[Achat]
+    achats: list[int]
 
     @classmethod
     def from_adherent(cls, data: Adherent):
@@ -66,7 +93,7 @@ class AdherentDTO:
             data.getNom(),
             data.getPrenom(),
             data.getSolde(),
-            data.getAchats()
+            data.achats
         )
     
     def from_dict(data: dict):
@@ -74,12 +101,12 @@ class AdherentDTO:
             data["nom"],
             data["prenom"],
             data["solde"],
-            [Achat.from_dict(a) for a in data["achats"]]
+            data["achats"]
         )
     
     def update(self, adherent: Adherent) -> None:
         adherent.renomer(self.nom, self.prenom)
         adherent.setSolde(self.solde)
-        adherent.achats = self.achats
+        adherent.setAchats(self.achats)
         
     

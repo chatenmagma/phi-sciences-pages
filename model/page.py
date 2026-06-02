@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from model.adherent import Adherent, AdherentDTO
-from model.produit import Produit
+from model.produit import Produit, Achat
 
 class Page:
     """
@@ -15,7 +15,8 @@ class Page:
     def __init__(self):
         self.serveurs: list[str] = []
         self.president: str = ""
-        self.adherents: list[Adherent] = [Adherent() for _ in range(Page.MAX_ADHERENTS)]
+        self.adherents: list[Adherent] = [Adherent(self) for _ in range(Page.MAX_ADHERENTS)]
+        self.historique: list[Achat] = []
 
         self.produits: dict[str, Produit] = {}
         self.setProduits([Produit("Diane", 0.1)])
@@ -48,6 +49,19 @@ class Page:
         self.serveurs = [s for s in nouveauServeurs if s != ""]
 
         self.serveurs.sort()
+    
+    def getHistorique(self) -> list[Achat]:
+        return self.historique
+
+    def setHistorique(self, nouveauHistorique: list[Achat]) -> None:
+        self.historique = nouveauHistorique.copy()
+    
+    def payer(self, index: int, achat: Achat):
+        self[index].payer(achat, len(self.getHistorique()))
+        self.historique.append(achat)
+    
+    def getDernierAchat(self) -> Achat:
+        return self.historique[-1]
 
     def __getitem__(self, index: int|str) -> Adherent:
         if type(index) == int:
@@ -64,6 +78,7 @@ class PageDTO:
     president: str
     adherents: dict[int, AdherentDTO]
     produits: list[Produit]
+    historique: list[Achat]
 
     @classmethod
     def from_page(cls, data: Page) -> PageDTO:
@@ -74,7 +89,8 @@ class PageDTO:
             [serveur for serveur in data.serveurs],
             data.president,
             { i: AdherentDTO.from_adherent(data[i]) for i in range(Page.MAX_ADHERENTS) if not data[i].estVide() },
-            [Produit(p.nom, p.prix) for p in data.produits.values() if p.nom != Page.AJOUT_COMMAND and p.nom != Page.RETRAIT_COMMAND]
+            [Produit(p.nom, p.prix) for p in data.produits.values() if p.nom != Page.AJOUT_COMMAND and p.nom != Page.RETRAIT_COMMAND],
+            data.getHistorique()
         )
 
     @staticmethod
@@ -83,7 +99,8 @@ class PageDTO:
             data["serveurs"],
             data["president"],
             { i:AdherentDTO.from_dict(v) for i, v in data["adherents"].items() },
-            [Produit(**p) for p in data["produits"]]
+            [Produit(**p) for p in data["produits"]],
+            [Achat.from_dict(h) for h in data["historique"]]
         )
     
     def update(self, page: Page) -> None:
@@ -92,8 +109,9 @@ class PageDTO:
         """
         for k, v in self.adherents.items(): # Parcours la liste des adhérents
             v.update(page[k])
-        for p in self.produits: # Parcours la liste des produits
-            page.produits[p.nom] = p
+        
+        page.setProduits(self.produits)
+        page.setHistorique(self.historique)
 
         page.serveurs = self.serveurs
         page.president = self.president

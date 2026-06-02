@@ -94,7 +94,7 @@ class VuePrincipale(Tk):
         self.sauvegarderCommand()
 
     def nettoyageCommand(self) -> None:
-        message = messagebox.askquestion(title="T SUR DE FËR SA?", message="T'es sûr de nettoyer les pages de solde 0€, les pauvres adhérents qui n'auront plus de pages....")
+        message = messagebox.askquestion(title="Demande pour le nettoyage des pages ?", message="T'es sûr de nettoyer les pages de solde 0€, les pauvres adhérents qui n'auront plus de pages....")
         if message == "yes":
             self.page.nettoyerAdherents()
         
@@ -128,19 +128,25 @@ class VuePrincipale(Tk):
         return menuBar
     
     @staticmethod
-    def changementDeFondLabel(adherent: Adherent, label: Label):
+    def on_solde_changement_arriereplan_label(adherent: Adherent, label: Label):
         if adherent.estNegatif():
             label.config(bg="red", fg="white")
         elif adherent.estZero():
             label.config(bg="white", fg="black")
         else:
             label.config(bg="green", fg="white")
+    @staticmethod
+    def on_adherent_changement_creation_label(adherent: Adherent, label: Label):
+        if adherent.estVide():
+            label.config(bg="#f3d47e")
+        else:
+            label.config(bg="#b8ceeb")
         
     @staticmethod
-    def on_surmoi(widget):
+    def on_sourris_sur_element(widget):
         widget.config(cursor="hand2", font=("Couriel", 10, "bold"))
     @staticmethod
-    def on_sourrisQuiSort(widget):
+    def on_sourris_sort_element(widget):
         widget.config(cursor="", font=("TkDefaultFont", 9, "normal"))
 
     def creerPage(self, index: int) -> Frame:
@@ -150,7 +156,7 @@ class VuePrincipale(Tk):
 
         adherent: Adherent = self.page[index]
 
-        indexLabel: Label = Label(entree, text=f"{index + 1}", anchor="e", width=3)
+        indexLabel: Label = Label(entree, text=f"{index + 1} |", anchor="e", width=4)
         indexLabel.grid(row=0, column=0, sticky="w")
 
         nomLabel: Label = Label(entree, textvariable=adherent.nomProperty, anchor="w")
@@ -162,8 +168,17 @@ class VuePrincipale(Tk):
         solde:Label = Label(entree, textvariable=adherent.soldeAffichageProperty, anchor="e", width=10)
         solde.grid(row=0, column=3, sticky="e", padx=3)
 
-        self.page[index].soldeProperty.trace_add("write", lambda *args: self.changementDeFondLabel(self.page[index], solde))
-        self.changementDeFondLabel(self.page[index], solde)
+        self.page[index].soldeProperty.trace_add("write", lambda *args: self.on_solde_changement_arriereplan_label(self.page[index], solde))
+        self.on_solde_changement_arriereplan_label(self.page[index], solde)
+
+        self.page[index].nomProperty.trace_add(("write"), lambda *args: (
+            self.on_adherent_changement_creation_label(self.page[index], indexLabel),
+            self.on_adherent_changement_creation_label(self.page[index], prenomLabel),
+            self.on_adherent_changement_creation_label(self.page[index], nomLabel)
+        ))
+        self.on_adherent_changement_creation_label(self.page[index], indexLabel)
+        self.on_adherent_changement_creation_label(self.page[index], prenomLabel)
+        self.on_adherent_changement_creation_label(self.page[index], nomLabel)
 
         widget = (indexLabel, entree, indexLabel, nomLabel, prenomLabel, solde)
         for w in widget:
@@ -171,16 +186,16 @@ class VuePrincipale(Tk):
 
             # Gestion de la sourris hoverlay sur les pages
             w.bind("<Enter>", lambda event: (
-                self.on_surmoi(indexLabel),
-                self.on_surmoi(nomLabel),
-                self.on_surmoi(prenomLabel),
-                self.on_surmoi(solde)
+                self.on_sourris_sur_element(indexLabel),
+                self.on_sourris_sur_element(nomLabel),
+                self.on_sourris_sur_element(prenomLabel),
+                self.on_sourris_sur_element(solde)
             ))
             w.bind("<Leave>", lambda event: (
-                self.on_sourrisQuiSort(indexLabel),
-                self.on_sourrisQuiSort(nomLabel),
-                self.on_sourrisQuiSort(prenomLabel),
-                self.on_sourrisQuiSort(solde)
+                self.on_sourris_sort_element(indexLabel),
+                self.on_sourris_sort_element(nomLabel),
+                self.on_sourris_sort_element(prenomLabel),
+                self.on_sourris_sort_element(solde)
             ))
 
         return entree
