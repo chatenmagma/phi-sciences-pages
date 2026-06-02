@@ -7,6 +7,7 @@ class Page:
     MAX_ADHERENTS: int = 200
     AJOUT_COMMAND: str = "ajout"
     RETRAIT_COMMAND: str = "retrait"
+    VERSION: str = "v1.0"
 
     def __init__(self):
         self.serveurs: list[str] = []

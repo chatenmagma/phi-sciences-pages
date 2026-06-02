@@ -35,7 +35,7 @@ class VueAchat(Toplevel):
             if self.choixServeur.get() == "" or serveur.lower().startswith(self.choixServeur.get().lower()):
                 listServeur.insert(END, serveur)
         
-        if self.choixServeur.get() != "":
+        if listServeur.size() > 0:
             listServeur.selection_set(0)
     
     def filterProduit(self, listProduit: Listbox) -> None:
@@ -45,8 +45,33 @@ class VueAchat(Toplevel):
             if self.choixProduit.get() == "" or produit.lower().startswith(self.choixProduit.get().lower()):
                 listProduit.insert(END, produit)
         
-        if self.choixProduit.get() != "":
+        if listProduit.size() > 0:
             listProduit.selection_set(0)
+    
+    def on_produit_selectione(self, event, produitList: Listbox):
+        """Gère la gestion d'un produit"""
+        selection = produitList.curselection()
+
+        if selection: self.choixProduit.set(produitList.get(selection[0]))
+    
+    def on_produit_entree(self, envent, produitList: Listbox):
+        """Gère la gestion d'un produit quand on appuie sur la touche entrée"""
+        selection = produitList.curselection()
+
+        if selection: self.choixProduit.set(produitList.get(selection[0]))
+    
+    def on_serveur_selectione(self, event, serveurList: Listbox):
+        """Gère la gestion d'un produit"""
+        selection = serveurList.curselection()
+
+        if selection: self.choixServeur.set(serveurList.get(selection[0]))
+    
+    def on_serveur_entree(self, envent, serveurList: Listbox):
+        """Gère la gestion d'un produit quand on appuie sur la touche entrée"""
+        selection = serveurList.curselection()
+
+        if selection: self.choixServeur.set(serveurList.get(selection[0]))
+    
     
     def creerAchat(self) -> Frame:
         achatFrame: Frame = Frame(self)
@@ -59,8 +84,8 @@ class VueAchat(Toplevel):
         produitList: Listbox = Listbox(achatFrame)
 
         produitEntry.bind("<KeyRelease>", lambda event: self.filterProduit(produitList))
-        produitEntry.bind("<Return>", lambda event: self.choixProduit.set(list(self.page.produits.keys())[produitList.curselection()[0]]))
-        produitList.bind("<<ListboxSelect>>", lambda event: self.choixProduit.set(list(self.page.produits.keys())[produitList.curselection()[0]]))
+        produitEntry.bind("<Return>", lambda event: self.on_produit_entree(event, produitList))
+        produitList.bind("<<ListboxSelect>>", lambda event: self.on_produit_selectione(event, produitList))
         self.filterProduit(produitList)
 
         produitList.grid(row=2, column=0, sticky="nsew")
@@ -73,8 +98,8 @@ class VueAchat(Toplevel):
         serveurList: Listbox = Listbox(achatFrame)
         
         serveurEntry.bind("<KeyRelease>", lambda event: self.filterServeur(serveurList))
-        serveurEntry.bind("<Return>", lambda event: self.choixServeur.set(self.page.serveurs[serveurList.curselection()[0]]))
-        serveurList.bind("<<ListboxSelect>>", lambda event: self.choixServeur.set(self.page.serveurs[serveurList.curselection()[0]]))
+        serveurEntry.bind("<Return>", lambda event: self.on_serveur_entree(event, serveurList))
+        serveurList.bind("<<ListboxSelect>>", lambda event: self.on_serveur_selectione(event, serveurList))
         self.filterServeur(serveurList)
 
         serveurList.grid(row=2, column=1, sticky="nsew")
@@ -146,7 +171,7 @@ class VueAchat(Toplevel):
 
         if (self.choixProduit.get() == Page.AJOUT_COMMAND) or (self.choixProduit.get() == Page.RETRAIT_COMMAND):
             try:
-                if self.choixProduit.get() == "ajout":
+                if self.choixProduit.get() == Page.AJOUT_COMMAND or self.choixProduit.get() == Page.RETRAIT_COMMAND:
                     valeur = float(self.ptetreValeur.get())
 
                     if valeur < 0:

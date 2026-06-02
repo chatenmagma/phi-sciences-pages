@@ -17,6 +17,7 @@ class VuePrincipale(Tk):
         super().__init__(None, None, "Tk", True, False, None)
 
         self.page: Page = Page()
+        self.title(f"Pages de Phi-Sciences {Page.VERSION}")
 
         file: Path = Path(self.fichierPrincipal())
 
@@ -123,14 +124,30 @@ class VuePrincipale(Tk):
 
         return menuBar
     
+    @staticmethod
+    def changementDeFondLabel(adherent: Adherent, label: Label):
+        if adherent.estNegatif():
+            label.config(bg="red", fg="white")
+        elif adherent.estZero():
+            label.config(bg="white", fg="black")
+        else:
+            label.config(bg="green", fg="white")
+        
+    @staticmethod
+    def on_surmoi(widget):
+        widget.config(cursor="hand2", font=("Couriel", 10, "bold"))
+    @staticmethod
+    def on_sourrisQuiSort(widget):
+        widget.config(cursor="", font=("TkDefaultFont", 9, "normal"))
+
     def creerPage(self, index: int) -> Frame:
-        entree = Frame(self)
+        entree = Frame(self, relief="ridge", bd=1)
 
         entree.columnconfigure(2, weight=1)
 
         adherent: Adherent = self.page[index]
 
-        indexLabel: Label = Label(entree, text=f"{index + 1}", anchor="w")
+        indexLabel: Label = Label(entree, text=f"{index + 1}", anchor="e", width=3)
         indexLabel.grid(row=0, column=0, sticky="w")
 
         nomLabel: Label = Label(entree, textvariable=adherent.nomProperty, anchor="w")
@@ -139,12 +156,29 @@ class VuePrincipale(Tk):
         prenomLabel: Label = Label(entree, textvariable=adherent.prenomProperty, anchor="w")
         prenomLabel.grid(row=0, column=2, sticky="ew")
 
-        solde:Label = Label(entree, textvariable=adherent.soldeAffichageProperty, anchor="e")
-        solde.grid(row=0, column=3, sticky="e")
+        solde:Label = Label(entree, textvariable=adherent.soldeAffichageProperty, anchor="e", width=10)
+        solde.grid(row=0, column=3, sticky="e", padx=3)
 
-        widget = (entree, indexLabel, nomLabel, prenomLabel, solde)
+        self.page[index].soldeProperty.trace_add("write", lambda *args: self.changementDeFondLabel(self.page[index], solde))
+        self.changementDeFondLabel(self.page[index], solde)
+
+        widget = (indexLabel, entree, indexLabel, nomLabel, prenomLabel, solde)
         for w in widget:
             w.bind("<Button-1>", lambda event: self.payerCommand(index))
+
+            # Gestion de la sourris hoverlay sur les pages
+            w.bind("<Enter>", lambda event: (
+                self.on_surmoi(indexLabel),
+                self.on_surmoi(nomLabel),
+                self.on_surmoi(prenomLabel),
+                self.on_surmoi(solde)
+            ))
+            w.bind("<Leave>", lambda event: (
+                self.on_sourrisQuiSort(indexLabel),
+                self.on_sourrisQuiSort(nomLabel),
+                self.on_sourrisQuiSort(prenomLabel),
+                self.on_sourrisQuiSort(solde)
+            ))
 
         return entree
 
