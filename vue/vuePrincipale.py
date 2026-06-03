@@ -20,7 +20,7 @@ class VuePrincipale(Tk):
     Vue principale avec les 200 pages
     """
 
-    DEFAULT_FONT_SIZE: int = 7
+    DEFAULT_FONT_SIZE: int = 10
     DEFAULT_FONT = ("TkDefaultFont", DEFAULT_FONT_SIZE, "normal")
     DEFAULT_FONT_SELECTIONEE = ("TkDefaultFont", DEFAULT_FONT_SIZE, "underline")
 
@@ -50,14 +50,38 @@ class VuePrincipale(Tk):
 
         self.config(menu=self.creerMenuBar())
 
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_columnconfigure(1, weight=1)
-        self.grid_columnconfigure(2, weight=1)
-        self.grid_columnconfigure(3, weight=1)
+        canvas: Canvas = Canvas(self)
+        canvas.pack(side=LEFT, fill=BOTH, expand=True)
+
+        scrollbar: Scrollbar = Scrollbar(self, orient="vertical", command=canvas.yview)
+        scrollbar.pack(side=RIGHT, fill="y")
+
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        cahier: Frame = Frame(canvas)
+        window_id = canvas.create_window((0, 0), window=cahier, anchor=NW)
+
+        def update_scollregion(event):
+            canvas.configure(scrollregion=canvas.bbox(ALL))
+        
+        def on_mollette(event):
+            canvas.yview_scroll(int(-1 * (event.delta / 128)), "units")
+        
+        def mettre_ajour_largueur(event):
+            canvas.itemconfig(window_id, width=event.width)
+
+        cahier.bind("<Configure>", update_scollregion)
+        canvas.bind("<Configure>", mettre_ajour_largueur)
+        canvas.bind("<MouseWheel>", on_mollette)
+
+        cahier.grid_columnconfigure(0, weight=1)
+        cahier.grid_columnconfigure(1, weight=1)
+        cahier.grid_columnconfigure(2, weight=1)
+        cahier.grid_columnconfigure(3, weight=1)
 
         for i in range(50):
             for j in range(4):
-                self.creerPage(i + j * 50).grid(row=i, column=j, sticky="ew", padx=3)
+                self.creerPage(cahier, i + j * 50).grid(row=i, column=j, sticky="ew", padx=3)
     
     @staticmethod
     def genere_nom_fichier_sauvegarde_backup() -> str:
@@ -183,8 +207,8 @@ class VuePrincipale(Tk):
     def on_sourris_sort_element(widget):
         widget.config(cursor="", font=VuePrincipale.DEFAULT_FONT)
 
-    def creerPage(self, index: int) -> Frame:
-        entree = Frame(self, relief="ridge", bd=1)
+    def creerPage(self, parent, index: int) -> Frame:
+        entree = Frame(parent, relief="ridge", bd=1)
 
         entree.columnconfigure(2, weight=1)
 
