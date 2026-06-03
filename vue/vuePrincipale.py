@@ -2,6 +2,9 @@ from tkinter import *
 from tkinter import filedialog
 from tkinter import messagebox
 
+import json
+from dataclasses import asdict
+
 from datetime import datetime
 from pathlib import Path
 
@@ -20,9 +23,7 @@ class VuePrincipale(Tk):
     Vue principale avec les 200 pages
     """
 
-    DEFAULT_FONT_SIZE: int = 10
-    DEFAULT_FONT = ("TkDefaultFont", DEFAULT_FONT_SIZE, "normal")
-    DEFAULT_FONT_SELECTIONEE = ("TkDefaultFont", DEFAULT_FONT_SIZE, "underline")
+    CONFIG_FILE: str = "config.json"
 
     def __init__(self):
         super().__init__(None, None, "Tk", True, False, None)
@@ -32,6 +33,15 @@ class VuePrincipale(Tk):
 
         file: Path = Path(self.fichier_principal(self.get_annee_scolaire()))
         file_ancienne_annee: Path = Path(self.fichier_principal(self.get_annee_scolaire() - 1))
+
+        self.config_style = {
+            "default-size": 10,
+            "default-font": "TkDefaultFont"
+        }
+
+        self.default_font_size: int = int(self.config_style["default-size"])
+        self.default_font: tuple = (self.config_style["default-font"], self.default_font_size, "normal")
+        self.default_font_selected: tuple = (self.config_style["default-font"], self.default_font_size, "underline")
 
         if file.exists():
             with open(file, "r") as f:
@@ -67,21 +77,44 @@ class VuePrincipale(Tk):
         def on_mollette(event):
             canvas.yview_scroll(int(-1 * (event.delta / 128)), "units")
         
+        def on_mollette_vers_haut_linux(event):
+            canvas.yview_scroll(-3, "units")
+        
+        def on_mollete_vers_bas_linux(event):
+            canvas.yview_scroll(3, "units")
+        
         def mettre_ajour_largueur(event):
             canvas.itemconfig(window_id, width=event.width)
 
         cahier.bind("<Configure>", update_scollregion)
         canvas.bind("<Configure>", mettre_ajour_largueur)
-        canvas.bind("<MouseWheel>", on_mollette)
+
+        canvas.bind_all("<MouseWheel>", on_mollette)
+        canvas.bind_all("<Button-4>", on_mollette_vers_haut_linux)
+        canvas.bind_all("<Button-5>", on_mollete_vers_bas_linux)
 
         cahier.grid_columnconfigure(0, weight=1)
         cahier.grid_columnconfigure(1, weight=1)
         cahier.grid_columnconfigure(2, weight=1)
         cahier.grid_columnconfigure(3, weight=1)
 
+        self.withdraw()
+
         for i in range(50):
             for j in range(4):
                 self.creerPage(cahier, i + j * 50).grid(row=i, column=j, sticky="ew", padx=3)
+        
+        self.deiconify()
+    
+    def charger_config_style(self) -> None:
+        file: Path = Path(VuePrincipale.CONFIG_FILE)
+
+        if not file.exists():
+            with open(file, "w") as f:
+                f.write(json.dumps(self.config))
+        else:
+            with open(file, "r") as f:
+                self.config = json.loads(f.read())
     
     @staticmethod
     def genere_nom_fichier_sauvegarde_backup() -> str:
@@ -200,12 +233,11 @@ class VuePrincipale(Tk):
         else:
             label.config(bg="#b8ceeb")
         
-    @staticmethod
-    def on_sourris_sur_element(widget):
-        widget.config(cursor="hand2", font=VuePrincipale.DEFAULT_FONT_SELECTIONEE)
-    @staticmethod
-    def on_sourris_sort_element(widget):
-        widget.config(cursor="", font=VuePrincipale.DEFAULT_FONT)
+    def on_sourris_sur_element(self, widget):
+        widget.config(cursor="hand2", font=self.default_font_selected)
+    
+    def on_sourris_sort_element(self, widget):
+        widget.config(cursor="", font=self.default_font)
 
     def creerPage(self, parent, index: int) -> Frame:
         entree = Frame(parent, relief="ridge", bd=1)
@@ -214,16 +246,16 @@ class VuePrincipale(Tk):
 
         adherent: Adherent = self.page[index]
 
-        indexLabel: Label = Label(entree, text=f"{index + 1} |", anchor="e", width=4, font=VuePrincipale.DEFAULT_FONT)
+        indexLabel: Label = Label(entree, text=f"{index + 1} |", anchor="e", width=4, font=self.default_font)
         indexLabel.grid(row=0, column=0, sticky="w")
 
-        nomLabel: Label = Label(entree, textvariable=adherent.nomProperty, anchor="w", font=VuePrincipale.DEFAULT_FONT)
+        nomLabel: Label = Label(entree, textvariable=adherent.nomProperty, anchor="w", font=self.default_font)
         nomLabel.grid(row=0, column=1, sticky="w")
 
-        prenomLabel: Label = Label(entree, textvariable=adherent.prenomProperty, anchor="w", font=VuePrincipale.DEFAULT_FONT)
+        prenomLabel: Label = Label(entree, textvariable=adherent.prenomProperty, anchor="w", font=self.default_font)
         prenomLabel.grid(row=0, column=2, sticky="ew")
 
-        solde:Label = Label(entree, textvariable=adherent.soldeAffichageProperty, anchor="e", width=10, font=VuePrincipale.DEFAULT_FONT)
+        solde:Label = Label(entree, textvariable=adherent.soldeAffichageProperty, anchor="e", width=10, font=self.default_font)
         solde.grid(row=0, column=3, sticky="e", padx=3)
 
         self.page[index].soldeProperty.trace_add("write", lambda *args: self.on_solde_changement_arriereplan_label(self.page[index], solde))
