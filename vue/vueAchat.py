@@ -4,6 +4,8 @@ from tkinter import messagebox
 
 from datetime import datetime
 
+from vue.messageErreurs import MessageErreurs
+
 from model import *
 
 class VueAchat(Toplevel):
@@ -145,27 +147,27 @@ class VueAchat(Toplevel):
     
     def valider(self):
         if self.nouveauNom.get() == "":
-            messagebox.showerror(title="C'est qui cet adhérent", message="L'adhérent n'a pas de nom de famille")
+            MessageErreurs.manque_valeur("nom", "nom")
             return
         if self.nouveauPrenom.get() == "":
-            messagebox.showerror(title="C'est qui cet adhérent", message="L'adhérent n'a pas de prenom")
+            MessageErreurs.manque_valeur("prenom", "prenom")
             return
 
         if self.choixProduit.get() == "":
-            messagebox.showerror(title="Devez dire quoi acheté", message="Vous avez oublié de mettre un produit dans QUOI?")
+            MessageErreurs.manque_valeur("produit", "QUOI?")
             return
         if self.choixServeur.get() == "":
-            messagebox.showerror(title="C'est qui fait l'action d'achat (un membre du staff)", message="Vous avez oublié de mettre un membre dans QUI?")
+            MessageErreurs.manque_valeur("serveur", "QUI?")
             return
         
         if self.choixProduit.get() not in list(self.page.produits.keys()):
-            messagebox.showerror(title="Produit inconnu", message="Ce produit est inconnu dans la liste, vous pouvez l'ajouté sur edition > modif produit")
+            MessageErreurs.valeur_indesponible("produit")
             return
         if self.choixServeur.get() not in self.page.serveurs:
-            messagebox.showerror(title="Membre du staff inconnu", message="Ce membre est inconnu dans la liste, vous pouvez l'ajouté sur edition > modif staff")
+            MessageErreurs.valeur_indesponible("serveur")
             return
         if (self.choixProduit.get() == Page.AJOUT_COMMAND or self.choixProduit.get() == Page.RETRAIT_COMMAND) and self.ptetreValeur.get() == "":
-            messagebox.showerror(title="Manque la donnée valeur", message="Pour tout ajout ou retrait, vous devez mettre la valeur")
+            MessageErreurs.valeur_indesponible("valeur")
             return
         
         valeur: float = 0.0
@@ -177,10 +179,10 @@ class VueAchat(Toplevel):
                     valeur = float(self.ptetreValeur.get().replace(",", ".")) # On remplace la virgule par un point, c'est plus pratique ;)
 
                     if valeur < 0:
-                        messagebox.showerror(title="Erreur valeur negative", message="La valeur doit être toujours positif")
+                        MessageErreurs.valeur_negative()
                         return
             except:
-                messagebox.showerror(title="Erreur du chiffre de valeur", message="Vous devez écrire un chiffre sous la forme 23,55 ou 0,34. De plus ce chiffre doit être positif")
+                MessageErreurs.encodement()
                 return
         else: # On recupère la valeur du produit
             valeur = self.page.produits[self.choixProduit.get()].prix

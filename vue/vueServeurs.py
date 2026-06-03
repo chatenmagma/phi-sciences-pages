@@ -1,5 +1,6 @@
 from tkinter import *
-from tkinter import messagebox
+
+from vue.messageErreurs import MessageErreurs
 
 from model import *
 
@@ -26,6 +27,8 @@ class VueServeur(Toplevel):
         presidentSection.pack()
 
         self.serveurText: Text = Text(self)
+
+        self.serveurText.insert(END, "\n") # Pour le président mort
         
         for s in page.serveurs:
             self.serveurText.insert(END, f"{s}\n")
@@ -47,13 +50,13 @@ class VueServeur(Toplevel):
 
     def valider(self) -> None:
         if self.nouveauPresident.get() == "":
-            messagebox.showerror(title="L'ANARCHIE YEAH !!!", message="Phi-Sciences a besoin d'un président...")
+            MessageErreurs.manque_valeur("president")
             return
 
         nouveauServeurs: list[str] = self.serveurText.get("1.0", "end-1c").split("\n")
 
         if self.nouveauPresident.get() not in nouveauServeurs:
-            messagebox.showerror(title="LE PRESIDENT EST UN HACKEUR !!!", message="Le président doit exister dans les serveurs, il doit quand même travailler éh oh !")
+            MessageErreurs.valeur_indesponible("president")
             return
 
         self.page.president = self.nouveauPresident.get()

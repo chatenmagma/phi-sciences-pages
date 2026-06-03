@@ -1,6 +1,8 @@
 from tkinter import *
 from tkinter import messagebox
 
+from vue.messageErreurs import MessageErreurs
+
 from model import *
 
 class VueProduit(Toplevel):
@@ -18,7 +20,7 @@ class VueProduit(Toplevel):
         
         for k in page.produits.keys():
             if k == Page.AJOUT_COMMAND or k == Page.RETRAIT_COMMAND: continue
-            self.produitsText.insert(END, f"{page.produits[k].prix} {k}\n")
+            self.produitsText.insert(END, f"{str(page.produits[k])}\n")
 
         self.produitsText.pack()
 
@@ -41,26 +43,26 @@ class VueProduit(Toplevel):
 
         prix: float = 0.0
 
-        for produit in textProduits:
+        for ligne in textProduits:
             if produit == "": continue
 
             try:
-                prixStr, nomProduit = produit.split(" ", 1)
+                prixStr, categories, nomProduit = ligne.split(" ", 2)
 
                 try:
-                    prix = float(prixStr)
+                    prix = float(prixStr.replace(",", ".").replace("€", ""))
 
                     if prix < 0:
-                        messagebox.showerror(title="Erreur T CON", message=f"Ligne \"{produit}\": La valeur doit être toujours positif....")
+                        MessageErreurs.valeur_negative(ligne)
                         return
                 except:
-                    messagebox.showerror(title="ERREUR DE TYPAGE DE VALEUR", message=f"Ligne \"{produit}\": La valeur est un chiffre, et ça doit être de la forme << 0.5 >> avec un POINT")
+                    MessageErreurs.encodement(ligne)
                     return
             except:
-                messagebox.showerror(title="Errer, de formatage", message=f"Ligne \"{produit}\": il manque un truc ça doit être de la forme \"3.4 Corsendonk\"")
+                MessageErreurs.formatage("Vous devez d'abods dire combien ça coûte puis donner le nom du produit\nExemple de bon formatage de produit: 0,20€ boisson-chaude-amer café", ligne)
                 return
             
-            produits.append(Produit(nomProduit, prix))
+            produits.append(Produit(nomProduit, prix, Produit.trie_categories(categories)))
         
         produits.sort()
         

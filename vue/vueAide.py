@@ -15,10 +15,18 @@ class VueAide(Toplevel):
         aideText: Text = Text(self, width=118, height=50)
         aideText.pack()
 
-        AIDE_TEXT:str = """Bienvenue sur la page d'aide pour l'utilisation des pages à Phi-Sciences.
+        AIDE_TEXT:str = f"""Bienvenue sur la page d'aide pour l'utilisation des pages à Phi-Sciences.
 
 Il y a 200 pages, ce qui est en vert veut dire que l'adhérent à une solde positive, en rouge c'est quand il est négative et en blanc qu'il est à zéro.
 Veuillez ne pas nettoyer constamment les pages (en cliquant sur le menu), mais faire une fois par an. Cela supprime tous les pages à solde zéro.
+
+Modication:
+  Vous pouvez modifier les porduits comme les membre du staff sur l'onglet modifi.
+    * Pour les produits, il faut écrire de cette façon << | prix | sa catégorie | nom du porduit | >> par exemple 0,20€ boisson-chaud café
+    * Pour les membre du staff, il faut juste écrire les prénom, et bien préciser le président. Bien-sûre le président doit être parmis nous ;)
+
+Voici toutes les catégories disponibles pours les produits:
+{Produit.TOUS_CATEGORIES}
 
 Contrôles:
  * Clique gauche de la sourris: sert à ouvrir la page d'achat, cela permet de passer commande aux adhérent.
