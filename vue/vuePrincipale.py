@@ -20,7 +20,7 @@ class VuePrincipale(Tk):
     Vue principale avec les 200 pages
     """
 
-    DEFAULT_FONT_SIZE: int = 8
+    DEFAULT_FONT_SIZE: int = 7
     DEFAULT_FONT = ("TkDefaultFont", DEFAULT_FONT_SIZE, "normal")
     DEFAULT_FONT_SELECTIONEE = ("TkDefaultFont", DEFAULT_FONT_SIZE, "underline")
 
@@ -190,16 +190,16 @@ class VuePrincipale(Tk):
 
         adherent: Adherent = self.page[index]
 
-        indexLabel: Label = Label(entree, text=f"{index + 1} |", anchor="e", width=4, font=("TkDefaultFont", 8, "normal"))
+        indexLabel: Label = Label(entree, text=f"{index + 1} |", anchor="e", width=4, font=VuePrincipale.DEFAULT_FONT)
         indexLabel.grid(row=0, column=0, sticky="w")
 
-        nomLabel: Label = Label(entree, textvariable=adherent.nomProperty, anchor="w", font=("TkDefaultFont", 8, "normal"))
+        nomLabel: Label = Label(entree, textvariable=adherent.nomProperty, anchor="w", font=VuePrincipale.DEFAULT_FONT)
         nomLabel.grid(row=0, column=1, sticky="w")
 
-        prenomLabel: Label = Label(entree, textvariable=adherent.prenomProperty, anchor="w", font=("TkDefaultFont", 8, "normal"))
+        prenomLabel: Label = Label(entree, textvariable=adherent.prenomProperty, anchor="w", font=VuePrincipale.DEFAULT_FONT)
         prenomLabel.grid(row=0, column=2, sticky="ew")
 
-        solde:Label = Label(entree, textvariable=adherent.soldeAffichageProperty, anchor="e", width=10, font=("TkDefaultFont", 8, "normal"))
+        solde:Label = Label(entree, textvariable=adherent.soldeAffichageProperty, anchor="e", width=10, font=VuePrincipale.DEFAULT_FONT)
         solde.grid(row=0, column=3, sticky="e", padx=3)
 
         self.page[index].soldeProperty.trace_add("write", lambda *args: self.on_solde_changement_arriereplan_label(self.page[index], solde))
