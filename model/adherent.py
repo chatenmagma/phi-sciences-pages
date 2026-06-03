@@ -29,11 +29,15 @@ class Adherent:
             self.setSolde(self.getSolde() + achat.prix)
         else:
             self.setSolde(self.getSolde() - achat.prix)
+
     def supprimer(self) -> None:
         if(self.estVide()): return
 
         self.renomer("", "")
         self.setSolde(0.0)
+        self.achats = []
+    
+    def viderAchat(self) -> None:
         self.achats = []
 
     def estNegatif(self) -> bool:

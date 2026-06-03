@@ -9,6 +9,7 @@ from vue.vueAchat import VueAchat
 from vue.vueAide import VueAide
 from vue.vueHistorique import VueHistorique
 from vue.vueProduit import VueProduit
+from vue.vueStatetique import VueStatetique
 from vue.vueServeurs import VueServeur
 
 from model import *
@@ -24,12 +25,23 @@ class VuePrincipale(Tk):
         self.page: Page = Page()
         self.title(f"Pages de Phi-Sciences {Page.VERSION}")
 
-        file: Path = Path(self.fichierPrincipal())
+        file: Path = Path(self.fichier_principal(self.get_annee_scolaire()))
+        file_ancienne_annee: Path = Path(self.fichier_principal(self.get_annee_scolaire() - 1))
 
         if file.exists():
             with open(file, "r") as f:
                 deserialise(f.read()).update(self.page)
                 f.close()
+        elif file_ancienne_annee.exists(): # On crée un nouveau fichier pour l'année en cours
+            with open(file_ancienne_annee, "r") as f:
+                deserialise(f.read()).update(self.page)
+                f.close()
+            
+            # On vide l'historique et les page à solde 0€
+            self.page.nettoyerAdherents()
+            self.page.viderHistorique()
+
+            self.commande_enrigistrer()
 
         self.config(menu=self.creerMenuBar())
 
@@ -43,72 +55,75 @@ class VuePrincipale(Tk):
                 self.creerPage(i + j * 50).grid(row=i, column=j, sticky="ew", padx=3)
     
     @staticmethod
-    def genereNomFichierSauvegardeBackup() -> str:
+    def genere_nom_fichier_sauvegarde_backup() -> str:
         """
         Donne le nom du fichier qui sert à faire des backup, il présise le temps
         """
         return f"pagePhiSciences_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json"
+    
     @staticmethod
-    def fichierPrincipal():
+    def get_annee_scolaire() -> int:
+        return datetime.now().year + 1 if datetime.now().month >= 8 else datetime.now().year
+
+    @staticmethod
+    def fichier_principal(annee: int, nomfichier: str = "pagePhiSciences"):
         """
         Donne le nom du fichier principal avec l'année universitaire en cours
         """
-        anneUniv: int = 0
-
-        if datetime.now().month >= 8: # en moins d'août
-            anneUniv = datetime.now().year + 1
-        else:
-            anneUniv = datetime.now().year
-
-        return f"pagePhiSciences_{anneUniv - 1}-{anneUniv}.json"
+        return f"{nomfichier}_{annee - 1}-{annee}.json"
     
-    def aide_commande(self) -> None:
+    def commande_aide(self) -> None:
         VueAide(self)
     
-    def sauvegarderCommand(self) -> None:
-        with open(self.fichierPrincipal(), "w", encoding="utf-8") as f: 
+    def commande_enrigistrer(self) -> None:
+        with open(self.fichier_principal(self.get_annee_scolaire()), "w", encoding="utf-8") as f: 
             f.write(serialise(self.page))
             f.close()
-        print("sauvegarde du fichier principal est fait")
 
-    def sauvegarderACommand(self) -> None:
-        self.sauvegarderCommand()
+    def commande_enrigistrer_sous(self) -> None:
+        self.commande_enrigistrer()
 
-        dir = Path(filedialog.askdirectory(title="Trouve ta sauvegarde"))
+        dir = Path(filedialog.askdirectory(title="Où allez-vous enrigistrer"))
 
         if not dir: return
 
-        cheminVersFichier: Path = Path(dir) / self.genereNomFichierSauvegardeBackup()
+        chemin: Path = Path(dir) / self.genere_nom_fichier_sauvegarde_backup()
 
-        with open(cheminVersFichier, "w", encoding="utf-8") as f: 
+        with open(chemin, "w", encoding="utf-8") as f: 
             f.write(serialise(self.page))
             f.close()
 
-    def payerCommand(self, index: int) -> None:
+    def commande_payer(self, index: int) -> None:
         VueAchat(self, self.page, index)
 
-        self.sauvegarderCommand()
+        self.commande_enrigistrer()
     
-    def vue_historique_command(self, index: int) -> None:
+    def commande_historique(self, index: int) -> None:
         if not self.page[index].estVide():
             VueHistorique(self, self.page, index)
     
-    def modifProduitCommand(self) -> None:
+    def commande_modifier_produits(self) -> None:
         VueProduit(self, self.page)
     
-        self.sauvegarderCommand()
+        self.commande_enrigistrer()
 
-    def modifServeursCommand(self) -> None:
+    def commande_modifier_serveurs(self) -> None:
         VueServeur(self, self.page)
 
-        self.sauvegarderCommand()
+        self.commande_enrigistrer()
 
-    def nettoyageCommand(self) -> None:
-        message = messagebox.askquestion(title="Demande pour le nettoyage des pages ?", message="T'es sûr de nettoyer les pages de solde 0€, les pauvres adhérents qui n'auront plus de pages....")
+    def commande_nettoyer(self) -> None:
+        message = messagebox.askquestion(
+            title="Demande pour le nettoyage des pages ?", 
+            message="T'es sûr de nettoyer les pages de solde 0€, les pauvres adhérents qui n'auront plus de pages...."
+        )
         if message == "yes":
             self.page.nettoyerAdherents()
         
-        self.sauvegarderCommand()
+        self.commande_enrigistrer()
+    
+    def commande_statetique(self) -> None:
+        VueStatetique(self, self.page)
 
     def creerMenuBar(self) -> Menu:
         menuBar: Menu = Menu(self)
@@ -118,8 +133,8 @@ class VuePrincipale(Tk):
         fichierMenu: Menu = Menu(menuBar, tearoff=0)
 
         fichierMenu.add_command(label="Ouvrir")
-        fichierMenu.add_command(label="Sauvegarder", command=self.sauvegarderCommand)
-        fichierMenu.add_command(label="Sauvegarder à", command=self.sauvegarderACommand)
+        fichierMenu.add_command(label="Sauvegarder", command=self.commande_enrigistrer)
+        fichierMenu.add_command(label="Sauvegarder à", command=self.commande_enrigistrer_sous)
         fichierMenu.add_separator()
         fichierMenu.add_command(label="Quitter", command=self.quit)
 
@@ -129,13 +144,15 @@ class VuePrincipale(Tk):
 
         editionMenu: Menu = Menu(menuBar, tearoff=0)
 
-        editionMenu.add_command(label="Nettoyage des pages", command=self.nettoyageCommand)
-        editionMenu.add_command(label="Modification des produits", command=self.modifProduitCommand)
-        editionMenu.add_command(label="Edition du staff", command=self.modifServeursCommand)
+        editionMenu.add_command(label="Nettoyage des pages", command=self.commande_nettoyer)
+        editionMenu.add_command(label="Modification des produits", command=self.commande_modifier_produits)
+        editionMenu.add_command(label="Edition du staff", command=self.commande_modifier_serveurs)
 
         menuBar.add_cascade(label="Edition", menu=editionMenu)
 
-        menuBar.add_command(label="Aide", command=self.aide_commande)
+        menuBar.add_command(label="Statetiques", command=self.commande_statetique)
+
+        menuBar.add_command(label="Aide", command=self.commande_aide)
 
         return menuBar
     
@@ -194,8 +211,8 @@ class VuePrincipale(Tk):
 
         widget = (indexLabel, entree, indexLabel, nomLabel, prenomLabel, solde)
         for w in widget:
-            w.bind("<Button-1>", lambda event: self.payerCommand(index))
-            w.bind("<Button-3>", lambda event: self.vue_historique_command(index))
+            w.bind("<Button-1>", lambda event: self.commande_payer(index))
+            w.bind("<Button-3>", lambda event: self.commande_historique(index))
 
             # Gestion de la sourris hoverlay sur les pages
             w.bind("<Enter>", lambda event: (
@@ -217,5 +234,5 @@ class VuePrincipale(Tk):
         self.mainloop()
 
     def avantFermerProgramme(self):
-        self.sauvegarderCommand()
+        self.commande_enrigistrer()
         print("Merci d'avoir utiliser, au revoir ;)")

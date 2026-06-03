@@ -44,6 +44,12 @@ class Page:
             if p.nom == Page.AJOUT_COMMAND or p.nom == Page.RETRAIT_COMMAND: continue
 
             self.produits[p.nom] = p
+        
+    def get_nombre_achats(self, categorie: str = "") -> int:
+        if categorie == "":
+            return len([a for a in self.historique if a.nom != Page.AJOUT_COMMAND and a.nom != Page.RETRAIT_COMMAND])
+        
+        return len([a for a in self.historique if (a.nom != Page.AJOUT_COMMAND and a.nom != Page.RETRAIT_COMMAND) and self.produits[a.nom].est_categorie(categorie)])
     
     def setServeurs(self, nouveauServeurs: list[str]) -> None:
         self.serveurs = [s for s in nouveauServeurs if s != ""]
@@ -59,6 +65,10 @@ class Page:
     def payer(self, index: int, achat: Achat):
         self[index].payer(achat, len(self.getHistorique()))
         self.historique.append(achat)
+
+    def viderHistorique(self):
+        self.historique = []
+        for adherent in self.adherents: adherent.viderAchat()
     
     def getDernierAchat(self) -> Achat:
         return self.historique[-1]

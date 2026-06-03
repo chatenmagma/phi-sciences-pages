@@ -40,5 +40,6 @@ Merci d'avoir lu, et tous ceux qui ajoute ou corrige un bug, veuillé augmenté 
   * Création automatique du fichier JSON de l'année en cours. Change en août
   * Beaucoup de protections sur les achats (vérification sur la solde avant de payer !!!!)
   * Historique des achats en général sur le modèle comme sur les adhérents comme pouvoir les lire
-  * Catégorie des produtis
+  * Catégorie des produtis avec leur petit stats
   * Un petit onglet aide
+  * gestion automatique de création de fichier à chaque année scolaire (et nettoie les pages)
