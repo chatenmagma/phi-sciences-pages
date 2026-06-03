@@ -91,7 +91,7 @@ class PageDTO:
     historique: list[Achat]
 
     @classmethod
-    def from_page(cls, data: Page) -> PageDTO:
+    def from_page(cls, data: Page) -> "PageDTO":
         """
         Donnee le type donnée 
         """
@@ -104,7 +104,7 @@ class PageDTO:
         )
 
     @staticmethod
-    def from_dict(data: dict) -> PageDTO:
+    def from_dict(data: dict) -> "PageDTO":
         return PageDTO(
             data["serveurs"],
             data["president"],

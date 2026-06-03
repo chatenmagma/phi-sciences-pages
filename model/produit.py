@@ -14,7 +14,7 @@ class Achat:
     page: int
 
     @staticmethod
-    def from_dict(data: dict) -> Achat:
+    def from_dict(data: dict) -> "Achat":
         return Achat(
             data["nom"],
             data["prix"],

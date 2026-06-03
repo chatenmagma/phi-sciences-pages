@@ -19,6 +19,11 @@ class VuePrincipale(Tk):
     """
     Vue principale avec les 200 pages
     """
+
+    DEFAULT_FONT_SIZE: int = 8
+    DEFAULT_FONT = ("TkDefaultFont", DEFAULT_FONT_SIZE, "normal")
+    DEFAULT_FONT_SELECTIONEE = ("TkDefaultFont", DEFAULT_FONT_SIZE, "underline")
+
     def __init__(self):
         super().__init__(None, None, "Tk", True, False, None)
 
@@ -173,10 +178,10 @@ class VuePrincipale(Tk):
         
     @staticmethod
     def on_sourris_sur_element(widget):
-        widget.config(cursor="hand2", font=("Couriel", 10, "bold"))
+        widget.config(cursor="hand2", font=VuePrincipale.DEFAULT_FONT_SELECTIONEE)
     @staticmethod
     def on_sourris_sort_element(widget):
-        widget.config(cursor="", font=("TkDefaultFont", 9, "normal"))
+        widget.config(cursor="", font=VuePrincipale.DEFAULT_FONT)
 
     def creerPage(self, index: int) -> Frame:
         entree = Frame(self, relief="ridge", bd=1)
@@ -185,16 +190,16 @@ class VuePrincipale(Tk):
 
         adherent: Adherent = self.page[index]
 
-        indexLabel: Label = Label(entree, text=f"{index + 1} |", anchor="e", width=4)
+        indexLabel: Label = Label(entree, text=f"{index + 1} |", anchor="e", width=4, font=("TkDefaultFont", 8, "normal"))
         indexLabel.grid(row=0, column=0, sticky="w")
 
-        nomLabel: Label = Label(entree, textvariable=adherent.nomProperty, anchor="w")
+        nomLabel: Label = Label(entree, textvariable=adherent.nomProperty, anchor="w", font=("TkDefaultFont", 8, "normal"))
         nomLabel.grid(row=0, column=1, sticky="w")
 
-        prenomLabel: Label = Label(entree, textvariable=adherent.prenomProperty, anchor="w")
+        prenomLabel: Label = Label(entree, textvariable=adherent.prenomProperty, anchor="w", font=("TkDefaultFont", 8, "normal"))
         prenomLabel.grid(row=0, column=2, sticky="ew")
 
-        solde:Label = Label(entree, textvariable=adherent.soldeAffichageProperty, anchor="e", width=10)
+        solde:Label = Label(entree, textvariable=adherent.soldeAffichageProperty, anchor="e", width=10, font=("TkDefaultFont", 8, "normal"))
         solde.grid(row=0, column=3, sticky="e", padx=3)
 
         self.page[index].soldeProperty.trace_add("write", lambda *args: self.on_solde_changement_arriereplan_label(self.page[index], solde))
