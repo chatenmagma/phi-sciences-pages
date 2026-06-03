@@ -80,7 +80,8 @@ class Produit:
         return categorie in self.categorie.split("-")
     
     def __str__(self) -> str:
-        return f"{self.prix:.2f}€ {self.categorie} {self.nom}"
+        prixStr: str = f"{self.prix:.2f}"
+        return f"{prixStr.replace(".", ",")}€ {self.categorie} {self.nom}"
 
     def __lt__(self, other):
         if type(other) == str:
