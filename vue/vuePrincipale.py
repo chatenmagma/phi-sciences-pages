@@ -75,7 +75,7 @@ class VuePrincipale(Tk):
             canvas.configure(scrollregion=canvas.bbox(ALL))
         
         def on_mollette(event):
-            canvas.yview_scroll(int(-1 * (event.delta / 128)), "units")
+            canvas.yview_scroll((-event.delta // 128) * 3, "units")
         
         def on_mollette_vers_haut_linux(event):
             canvas.yview_scroll(-3, "units")

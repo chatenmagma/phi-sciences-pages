@@ -44,23 +44,26 @@ class VueProduit(Toplevel):
         prix: float = 0.0
 
         for ligne in textProduits:
-            if produit == "": continue
+            if ligne == "": continue
 
-            try:
-                prixStr, categories, nomProduit = ligne.split(" ", 2)
+            element: str = ligne.split(" ", 2)
 
-                try:
-                    prix = float(prixStr.replace(",", ".").replace("€", ""))
-
-                    if prix < 0:
-                        MessageErreurs.valeur_negative(ligne)
-                        return
-                except:
-                    MessageErreurs.encodement(ligne)
-                    return
-            except:
+            if len(element) != 3:
                 MessageErreurs.formatage("Vous devez d'abods dire combien ça coûte puis donner le nom du produit\nExemple de bon formatage de produit: 0,20€ boisson-chaude-amer café", ligne)
                 return
+
+            prixStr, categories, nomProduit = element
+
+            try:
+                prix = float(prixStr.replace(",", ".").replace("€", ""))
+
+                if prix < 0:
+                    MessageErreurs.valeur_negative(ligne)
+                    return
+            except ValueError:
+                MessageErreurs.encodement(ligne)
+                return
+           
             
             produits.append(Produit(nomProduit, prix, Produit.trie_categories(categories)))
         
